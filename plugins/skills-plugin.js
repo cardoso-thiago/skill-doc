@@ -82,7 +82,7 @@ module.exports = function skillsPlugin(context, options) {
       // Home route: list of skills
       addRoute({
         path: '/',
-        component: '@site/src/pages/index',
+        component: '@site/src/components/HomePage',
         modules: {
           skillsData: skillsDataPath,
         },

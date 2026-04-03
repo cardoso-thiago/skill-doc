@@ -71,7 +71,7 @@ function SkillCard({ skill, query }: { skill: Skill; query: string }) {
   );
 }
 
-export default function Home({ skillsData }: HomeProps) {
+export default function Home({ skillsData = [] }: HomeProps) {
   const [query, setQuery] = useState('');
 
   const filteredSkills = useMemo(() => {
@@ -88,6 +88,10 @@ export default function Home({ skillsData }: HomeProps) {
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   }, []);
+
+  if (!skillsData) {
+    return null;
+  }
 
   return (
     <div className="skills-layout">

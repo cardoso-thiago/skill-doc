@@ -15,7 +15,13 @@ const config = {
   projectName: 'skill-doc',
 
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    format: 'mdx',
+    anchors: {
+      maintainCase: true,
+    },
+  },
+  onDuplicateRoutes: 'warn',
 
   i18n: {
     defaultLocale: 'en',
