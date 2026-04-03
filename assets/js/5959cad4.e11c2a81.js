@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkskill_doc=self.webpackChunkskill_doc||[]).push([[879],{5199(s){s.exports=JSON.parse('{"name":"skills-plugin","id":"default"}')}}]);

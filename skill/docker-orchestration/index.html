@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Skills Showcase</title><meta data-rh="true" property="og:title" content="Skills Showcase"><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://cardoso-thiago.github.io/skill-doc/skill/docker-orchestration"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docusaurus_tag" content="default"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docsearch:docusaurus_tag" content="default"><link data-rh="true" rel="icon" href="/skill-doc/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://cardoso-thiago.github.io/skill-doc/skill/docker-orchestration"><link data-rh="true" rel="alternate" href="https://cardoso-thiago.github.io/skill-doc//skill/docker-orchestration" hreflang="en"><link data-rh="true" rel="alternate" href="https://cardoso-thiago.github.io/skill-doc//skill/docker-orchestration" hreflang="x-default"><link rel="stylesheet" href="/skill-doc/assets/css/styles.1beee983.css">
+<script src="/skill-doc/assets/js/runtime~main.ffc80114.js" defer="defer"></script>
+<script src="/skill-doc/assets/js/main.9536a101.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>document.documentElement.setAttribute("data-theme","dark"),document.documentElement.setAttribute("data-theme-choice","dark"),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div class="skill-page"><a class="skill-page__back" href="/skill-doc/"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M10 7H4M4 7L6.5 4.5M4 7L6.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>Back to all skills</a><div class="github-badge" role="complementary" aria-label="GitHub source"><span class="github-badge__label">// View source on GitHub</span><a href="https://github.com/cardoso-thiago/skill-doc/blob/main/skills/docker-orchestration/SKILL.md" target="_blank" rel="noopener noreferrer" class="github-badge__link" aria-label="View Docker &amp; Container Orchestration source on GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"></path></svg>Open SKILL.md</a></div><article class="skill-content"><h1>Docker &amp; Container Orchestration</h1>
+<p>Master containerization from single Dockerfile to production-grade Kubernetes deployments.</p>
+<h2>Core Capabilities</h2>
+<ul>
+<li><strong>Multi-stage builds</strong>: Reduce image size by up to 90% with optimized Dockerfiles</li>
+<li><strong>Docker Compose</strong>: Orchestrate local development environments with one command</li>
+<li><strong>Kubernetes deployments</strong>: Deployments, Services, ConfigMaps, Secrets, and HPA</li>
+<li><strong>Health checks &amp; probes</strong>: Liveness and readiness probes for zero-downtime deployments</li>
+<li><strong>CI/CD integration</strong>: GitHub Actions, GitLab CI, and Jenkins pipeline templates</li>
+</ul>
+<h2>When to Use</h2>
+<p>Use this skill when you need to:</p>
+<ul>
+<li>Containerize an existing application</li>
+<li>Set up local dev environments with Docker Compose</li>
+<li>Deploy to Kubernetes (GKE, EKS, AKS, or self-hosted)</li>
+<li>Optimize image build times in CI pipelines</li>
+</ul>
+<h2>Example: Optimized Multi-Stage Dockerfile</h2>
+<pre><code class="hljs language-dockerfile"># Build stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Runtime stage
+FROM node:20-alpine AS runtime
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD wget -qO- http://localhost:3000/health || exit 1
+USER node
+CMD [&quot;node&quot;, &quot;server.js&quot;]
+</code></pre>
+<h2>Best Practices</h2>
+<ol>
+<li><strong>Never run as root</strong> in production containers</li>
+<li><strong>Pin base image versions</strong> — never use <code>:latest</code></li>
+<li><strong>Use <code>.dockerignore</code></strong> to exclude node_modules, .git, and secrets</li>
+<li><strong>One process per container</strong> — sidecars go in separate containers</li>
+</ol></article></div></div>
+</body>
+</html>
