@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "skills": {
+    "Docusaurus Customization": {
+      "source": "fatima367/ai-spec-driven-book",
+      "sourceType": "github",
+      "computedHash": "486c2ec42cbd589e74c0abc9c024c81db961eb9fb1c85d46eb80d33e6db5e551"
+    },
+    "docusaurus-config-setup": {
+      "source": "jeremylongshore/claude-code-plugins-plus-skills",
+      "sourceType": "github",
+      "computedHash": "269bc5759b9e485f620f5770697539cc68cab1ac5b7558ddfba3bc8ecee6a554"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "react:components": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "computedHash": "01a94f035a1c3a1a405f611c0df212433d8973f18bf16e94540875ec58ee7b9b"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "1be892a3ea68b74654326ef836a58dd528d99ae0ab8d879764e2519c39068e67"
+    }
+  }
+}
