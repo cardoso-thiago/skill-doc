@@ -95,6 +95,13 @@ footer.footer,
 
 .main-wrapper {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure the layout takes full width/height without extra bars */
+#\__docusaurus {
+  background-color: var(--bg-base);
 }
 
 /* ── Layout wrapper ── */
@@ -376,8 +383,9 @@ footer.footer,
 .skill-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--gap-xl) var(--gap-lg);
+  padding: var(--gap-xl) var(--gap-lg) var(--gap-2xl);
   animation: page-enter 0.4s var(--ease-out) both;
+  flex-grow: 1;
 }
 
 @keyframes page-enter {

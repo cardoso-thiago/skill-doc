@@ -79,9 +79,11 @@ module.exports = function skillsPlugin(context, options) {
         JSON.stringify(skills)
       );
 
+      const { baseUrl } = context;
+
       // Home route: custom route using the component in src/components
       addRoute({
-        path: '/',
+        path: baseUrl,
         component: '@site/src/components/HomePage',
         modules: {
           skillsData: skillsDataPath,
@@ -97,7 +99,7 @@ module.exports = function skillsPlugin(context, options) {
         );
 
         addRoute({
-          path: `/skill/${skill.id}`,
+          path: `${baseUrl}skill/${skill.id}`,
           component: '@site/src/components/SkillPage',
           modules: {
             skillData: skillDataPath,

@@ -50,7 +50,7 @@ const config = {
         hideOnScroll: false,
         items: [],
       },
-      footer: undefined,
+      footer: { style: 'dark', links: [] },
       prism: {
         theme: prismThemes.dracula,
         darkTheme: prismThemes.dracula,
