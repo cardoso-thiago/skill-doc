@@ -10,10 +10,9 @@ const config = {
 
   url: 'https://cardoso-thiago.github.io',
   baseUrl: '/skill-doc/',
-
   organizationName: 'cardoso-thiago',
   projectName: 'skill-doc',
-
+  trailingSlash: false,
   onBrokenLinks: 'warn',
   markdown: {
     format: 'mdx',

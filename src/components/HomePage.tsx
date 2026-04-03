@@ -37,9 +37,11 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   );
 }
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 function SkillCard({ skill, query }: { skill: Skill; query: string }) {
   return (
-    <Link to={`/skill/${skill.id}`} className="skill-card">
+    <Link to={useBaseUrl(`/skill/${skill.id}`)} className="skill-card">
       <div className="skill-card__header">
         <span className="skill-card__id">{skill.id}</span>
         <svg
