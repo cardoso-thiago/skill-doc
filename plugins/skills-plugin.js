@@ -70,7 +70,7 @@ module.exports = function skillsPlugin(context, options) {
     },
 
     async contentLoaded({ content, actions }) {
-      const { createData, addRoute } = actions;
+      const { createData, addRoute, setGlobalData } = actions;
       const { skills } = content;
 
       // Write the full skills data as a JSON module
@@ -79,14 +79,9 @@ module.exports = function skillsPlugin(context, options) {
         JSON.stringify(skills)
       );
 
-      // Home route: list of skills
-      addRoute({
-        path: '/',
-        component: '@site/src/components/HomePage',
-        modules: {
-          skillsData: skillsDataPath,
-        },
-        exact: true,
+      // Global Data for the Home page
+      setGlobalData({
+        allSkills: skills,
       });
 
       // Individual skill routes

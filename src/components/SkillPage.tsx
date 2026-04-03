@@ -25,13 +25,10 @@ function GithubIcon() {
   );
 }
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 export default function SkillPage({ skillData }: SkillPageProps) {
-  const backUrl = useBaseUrl('/');
   return (
     <div className="skill-page">
-      <Link to={backUrl} className="skill-page__back">
+      <Link to="/" className="skill-page__back">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M10 7H4M4 7L6.5 4.5M4 7L6.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

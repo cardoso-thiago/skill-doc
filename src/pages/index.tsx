@@ -37,11 +37,9 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   );
 }
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 function SkillCard({ skill, query }: { skill: Skill; query: string }) {
   return (
-    <Link to={useBaseUrl(`/skill/${skill.id}`)} className="skill-card">
+    <Link to={`/skill/${skill.id}`} className="skill-card">
       <div className="skill-card__header">
         <span className="skill-card__id">{skill.id}</span>
         <svg
@@ -73,7 +71,12 @@ function SkillCard({ skill, query }: { skill: Skill; query: string }) {
   );
 }
 
-export default function Home({ skillsData = [] }: HomeProps) {
+import useGlobalData from '@docusaurus/useGlobalData';
+
+export default function Home() {
+  const globalData = useGlobalData();
+  const skillsData = (globalData?.['skills-plugin']?.['default'] as any)?.allSkills || [];
+  
   const [query, setQuery] = useState('');
 
   const filteredSkills = useMemo(() => {
@@ -90,10 +93,6 @@ export default function Home({ skillsData = [] }: HomeProps) {
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   }, []);
-
-  if (!skillsData) {
-    return null;
-  }
 
   return (
     <div className="skills-layout">

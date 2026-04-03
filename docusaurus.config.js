@@ -12,7 +12,6 @@ const config = {
   baseUrl: '/skill-doc/',
   organizationName: 'cardoso-thiago',
   projectName: 'skill-doc',
-  trailingSlash: false,
   onBrokenLinks: 'warn',
   markdown: {
     format: 'mdx',
@@ -21,14 +20,14 @@ const config = {
     },
   },
   onDuplicateRoutes: 'warn',
+  trailingSlash: true,
 
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
   },
-
   plugins: [
-    './plugins/skills-plugin',
+    ['./plugins/skills-plugin', { id: 'skills-plugin' }],
   ],
 
   presets: [
