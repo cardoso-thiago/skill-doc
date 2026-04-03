@@ -35,9 +35,15 @@ module.exports = function skillsPlugin(context, options) {
 
     async loadContent() {
       const skillsDir = path.join(context.siteDir, 'skills');
+      const docPath = path.join(context.siteDir, 'DOC.md');
+
+      let infoDoc = '';
+      if (fs.existsSync(docPath)) {
+        infoDoc = fs.readFileSync(docPath, 'utf-8');
+      }
 
       if (!fs.existsSync(skillsDir)) {
-        return { skills: [] };
+        return { skills: [], infoDoc };
       }
 
       const skillFolders = fs.readdirSync(skillsDir).filter((name) => {
@@ -48,10 +54,20 @@ module.exports = function skillsPlugin(context, options) {
       const skills = skillFolders
         .map((folderName) => {
           const skillMdPath = path.join(skillsDir, folderName, 'SKILL.md');
+          const categoryPath = path.join(skillsDir, folderName, 'category.txt');
+          
           if (!fs.existsSync(skillMdPath)) return null;
 
           const raw = fs.readFileSync(skillMdPath, 'utf-8');
           const { data, content } = parseFrontmatter(raw);
+
+          let categories = ['General'];
+          if (fs.existsSync(categoryPath)) {
+            const catRaw = fs.readFileSync(categoryPath, 'utf-8').trim();
+            if (catRaw) {
+              categories = catRaw.split(',').map(c => c.trim()).filter(Boolean);
+            }
+          }
 
           const githubUrl = `${GITHUB_REPO}/blob/${GITHUB_BRANCH}/skills/${folderName}/SKILL.md`;
 
@@ -61,22 +77,29 @@ module.exports = function skillsPlugin(context, options) {
             description: data.description || '',
             license: data.license || null,
             content,
+            categories,
             githubUrl,
           };
         })
         .filter(Boolean);
 
-      return { skills };
+      return { skills, infoDoc };
     },
 
     async contentLoaded({ content, actions }) {
       const { createData, addRoute, setGlobalData } = actions;
-      const { skills } = content;
+      const { skills, infoDoc } = content;
 
       // Write the full skills data as a JSON module
       const skillsDataPath = await createData(
         'skills-index.json',
         JSON.stringify(skills)
+      );
+
+      // Write the info documentation data
+      const infoDataPath = await createData(
+        'info-doc.json',
+        JSON.stringify({ content: infoDoc })
       );
 
       const { baseUrl } = context;
@@ -87,6 +110,7 @@ module.exports = function skillsPlugin(context, options) {
         component: '@site/src/components/HomePage',
         modules: {
           skillsData: skillsDataPath,
+          infoData: infoDataPath,
         },
         exact: true,
       });
