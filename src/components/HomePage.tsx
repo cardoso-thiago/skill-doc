@@ -71,11 +71,7 @@ function SkillCard({ skill, query }: { skill: Skill; query: string }) {
   );
 }
 
-import useGlobalData from '@docusaurus/useGlobalData';
-
-export default function Home() {
-  const globalData = useGlobalData();
-  const skillsData = (globalData?.['skills-plugin']?.['default'] as any)?.allSkills || [];
+export default function Home({ skillsData = [] }: HomeProps) {
   
   const [query, setQuery] = useState('');
 

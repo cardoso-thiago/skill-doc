@@ -79,9 +79,14 @@ module.exports = function skillsPlugin(context, options) {
         JSON.stringify(skills)
       );
 
-      // Global Data for the Home page
-      setGlobalData({
-        allSkills: skills,
+      // Home route: custom route using the component in src/components
+      addRoute({
+        path: '/',
+        component: '@site/src/components/HomePage',
+        modules: {
+          skillsData: skillsDataPath,
+        },
+        exact: true,
       });
 
       // Individual skill routes
