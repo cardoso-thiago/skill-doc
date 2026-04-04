@@ -55,6 +55,7 @@ module.exports = function skillsPlugin(context, options) {
         .map((folderName) => {
           const skillMdPath = path.join(skillsDir, folderName, 'SKILL.md');
           const categoryPath = path.join(skillsDir, folderName, 'category.txt');
+          const authorPath = path.join(skillsDir, folderName, 'author.txt');
           
           if (!fs.existsSync(skillMdPath)) return null;
 
@@ -69,6 +70,14 @@ module.exports = function skillsPlugin(context, options) {
             }
           }
 
+          let authors = [];
+          if (fs.existsSync(authorPath)) {
+            const authorRaw = fs.readFileSync(authorPath, 'utf-8').trim();
+            if (authorRaw) {
+              authors = authorRaw.split(',').map(a => a.trim()).filter(Boolean);
+            }
+          }
+
           const githubUrl = `${GITHUB_REPO}/blob/${GITHUB_BRANCH}/skills/${folderName}/SKILL.md`;
 
           return {
@@ -78,6 +87,7 @@ module.exports = function skillsPlugin(context, options) {
             license: data.license || null,
             content,
             categories,
+            authors,
             githubUrl,
           };
         })

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Link from '@docusaurus/Link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,6 +10,7 @@ interface Skill {
   license: string | null;
   githubUrl: string;
   categories: string[];
+  authors: string[];
 }
 
 interface HomeProps {
@@ -46,13 +47,16 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 function SkillCard({
   skill,
   query,
-  onCategoryClick
+  onCategoryClick,
+  onAuthorClick
 }: {
   skill: Skill;
   query: string;
   onCategoryClick: (category: string) => void;
+  onAuthorClick: (author: string) => void;
 }) {
-  const [showAll, setShowAll] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllAuthors, setShowAllAuthors] = useState(false);
 
   const handleCatClick = (e: React.MouseEvent, cat: string) => {
     e.preventDefault();
@@ -60,14 +64,29 @@ function SkillCard({
     onCategoryClick(cat);
   };
 
-  const toggleShowAll = (e: React.MouseEvent) => {
+  const handleAuthorClick = (e: React.MouseEvent, author: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setShowAll(!showAll);
+    onAuthorClick(author);
   };
 
-  const displayedCategories = showAll ? skill.categories : skill.categories.slice(0, 3);
-  const hasMore = skill.categories.length > 3;
+  const toggleShowAllCategories = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowAllCategories(!showAllCategories);
+  };
+
+  const toggleShowAllAuthors = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowAllAuthors(!showAllAuthors);
+  };
+
+  const displayedCategories = showAllCategories ? skill.categories : skill.categories.slice(0, 3);
+  const hasMoreCategories = skill.categories.length > 3;
+
+  const displayedAuthors = showAllAuthors ? skill.authors : skill.authors.slice(0, 3);
+  const hasMoreAuthors = skill.authors.length > 3;
 
   return (
     <div className="skill-card-wrapper">
@@ -83,13 +102,13 @@ function SkillCard({
                 {cat}
               </span>
             ))}
-            {hasMore && (
+            {hasMoreCategories && (
               <button
-                className={`skill-card__category-toggle ${showAll ? 'is-expanded' : ''}`}
-                onClick={toggleShowAll}
-                title={showAll ? 'Show less' : `Show ${skill.categories.length - 3} more`}
+                className={`skill-card__category-toggle ${showAllCategories ? 'is-expanded' : ''}`}
+                onClick={toggleShowAllCategories}
+                title={showAllCategories ? 'Show less' : `Show ${skill.categories.length - 3} more`}
               >
-                {showAll ? '−' : `+${skill.categories.length - 3}`}
+                {showAllCategories ? '−' : `+${skill.categories.length - 3}`}
               </button>
             )}
           </div>
@@ -120,7 +139,30 @@ function SkillCard({
         </p>
 
         <div className="skill-card__footer">
-          <span className="skill-card__id">{skill.id}</span>
+          {skill.authors && skill.authors.length > 0 ? (
+            <div className="skill-card__authors">
+              {displayedAuthors.map((author, idx) => (
+                <button
+                  key={idx}
+                  className="skill-card__author-btn"
+                  onClick={(e) => handleAuthorClick(e, author)}
+                >
+                  {author}
+                </button>
+              ))}
+              {hasMoreAuthors && (
+                <button
+                  className={`skill-card__category-toggle ${showAllAuthors ? 'is-expanded' : ''}`}
+                  onClick={toggleShowAllAuthors}
+                  title={showAllAuthors ? 'Show less' : `Show ${skill.authors.length - 3} more`}
+                >
+                  {showAllAuthors ? '−' : `+${skill.authors.length - 3}`}
+                </button>
+              )}
+            </div>
+          ) : (
+            <span className="skill-card__id">{skill.id}</span>
+          )}
         </div>
       </Link>
     </div>
@@ -129,10 +171,21 @@ function SkillCard({
 
 export default function Home({ skillsData = [], infoData }: HomeProps) {
   const [query, setQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'skills' | 'categories' | 'info'>('skills');
+  const [activeTab, setActiveTab] = useState<'skills' | 'categories' | 'authors' | 'info'>('skills');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
 
   const [catSortBy, setCatSortBy] = useState<'name' | 'count'>('name');
+  const [authorSortBy, setAuthorSortBy] = useState<'name' | 'count'>('count');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authorParam = params.get('author');
+    if (authorParam) {
+      setSelectedAuthor(decodeURIComponent(authorParam));
+      setActiveTab('skills');
+    }
+  }, []);
   
   const categoriesWithCounts = useMemo(() => {
     const list = Array.from(new Set(skillsData.flatMap(s => s.categories)));
@@ -153,12 +206,36 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
     return sorted;
   }, [categoriesWithCounts, catSortBy]);
 
+  const authorsWithCounts = useMemo(() => {
+    const list = Array.from(new Set(skillsData.flatMap(s => s.authors || [])));
+    return list.map(name => ({
+      name,
+      count: skillsData.filter(s => (s.authors || []).includes(name)).length
+    }));
+  }, [skillsData]);
+
+  const sortedAuthors = useMemo(() => {
+    const sorted = [...authorsWithCounts].sort((a, b) => {
+      if (authorSortBy === 'count') {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      }
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
+    return sorted;
+  }, [authorsWithCounts, authorSortBy]);
+
   const filteredSkills = useMemo(() => {
     let result = skillsData;
 
     // Filter by selected category first
     if (selectedCategory) {
       result = result.filter(s => s.categories.includes(selectedCategory));
+    }
+
+    // Filter by selected author
+    if (selectedAuthor) {
+      result = result.filter(s => (s.authors || []).includes(selectedAuthor));
     }
 
     // Filter by search query
@@ -169,21 +246,28 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
           s.name.toLowerCase().includes(q) ||
           s.description.toLowerCase().includes(q) ||
           s.id.toLowerCase().includes(q) ||
-          s.categories.some(c => c.toLowerCase().includes(q))
+          s.categories.some(c => c.toLowerCase().includes(q)) ||
+          (s.authors || []).some(a => a.toLowerCase().includes(q))
       );
     }
 
     return result;
-  }, [skillsData, query, selectedCategory]);
+  }, [skillsData, query, selectedCategory, selectedAuthor]);
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   }, []);
 
   const clearCategory = () => setSelectedCategory(null);
+  const clearAuthor = () => setSelectedAuthor(null);
 
   const handleCategorySelect = (cat: string) => {
     setSelectedCategory(cat);
+    setActiveTab('skills');
+  };
+
+  const handleAuthorSelect = (author: string) => {
+    setSelectedAuthor(author);
     setActiveTab('skills');
   };
 
@@ -212,6 +296,12 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
             onClick={() => setActiveTab('categories')}
           >
             Categories
+          </button>
+          <button
+            className={`nav-tab ${activeTab === 'authors' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('authors')}
+          >
+            Authors
           </button>
           <button
             className={`nav-tab ${activeTab === 'info' ? 'is-active' : ''}`}
@@ -257,11 +347,17 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
               {selectedCategory && (
                 <> in <strong>{selectedCategory}</strong></>
               )}
+              {selectedAuthor && (
+                <> by <strong>{selectedAuthor}</strong></>
+              )}
               {query.trim() && ` matching "${query}"`}
             </p>
-            {selectedCategory && (
-              <button className="clear-filter" onClick={clearCategory}>
-                ✕ Clear category filter
+            {(selectedCategory || selectedAuthor) && (
+              <button className="clear-filter" onClick={() => {
+                clearCategory();
+                clearAuthor();
+              }}>
+                ✕ Clear filters
               </button>
             )}
           </div>
@@ -275,6 +371,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
                       skill={skill}
                       query={query}
                       onCategoryClick={handleCategorySelect}
+                      onAuthorClick={handleAuthorSelect}
                     />
                   </div>
                 ))
@@ -319,6 +416,40 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
                 <span className="category-item__line"></span>
                 <span className="category-item__count">
                   {cat.count} {cat.count === 1 ? 'skill' : 'skills'}
+                </span>
+              </button>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {activeTab === 'authors' && (
+        <main className="categories-view">
+          <div className="category-header">
+            <button 
+              className={`category-header__label ${authorSortBy === 'name' ? 'is-active' : ''}`}
+              onClick={() => setAuthorSortBy('name')}
+            >
+              AUTHOR
+            </button>
+            <button 
+              className={`category-header__label ${authorSortBy === 'count' ? 'is-active' : ''}`}
+              onClick={() => setAuthorSortBy('count')}
+            >
+              #
+            </button>
+          </div>
+          <div className="categories-list">
+            {sortedAuthors.map(author => (
+              <button
+                key={author.name}
+                className="category-item"
+                onClick={() => handleAuthorSelect(author.name)}
+              >
+                <span className="category-item__name">{author.name}</span>
+                <span className="category-item__line"></span>
+                <span className="category-item__count">
+                  {author.count} {author.count === 1 ? 'skill' : 'skills'}
                 </span>
               </button>
             ))}

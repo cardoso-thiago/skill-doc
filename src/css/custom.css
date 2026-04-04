@@ -976,3 +976,48 @@ footer.footer,
   background: var(--accent-dim);
   border-color: var(--accent);
 }
+
+/* ── Author Button on Card ── */
+.skill-card__authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+
+.skill-card__author-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skill-card__author-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+/* ── Skill Page Authors ── */
+.skill-page__authors {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+  margin-bottom: var(--gap-xl);
+}
+
+.skill-page__authors-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -11,6 +11,7 @@ interface SkillData {
   license: string | null;
   content: string;
   githubUrl: string;
+  authors: string[];
 }
 
 interface SkillPageProps {
@@ -26,6 +27,19 @@ function GithubIcon() {
 }
 
 export default function SkillPage({ skillData }: SkillPageProps) {
+  const [showAllAuthors, setShowAllAuthors] = useState(false);
+
+  const handleAuthorClick = (author: string) => {
+    window.location.href = `/?author=${encodeURIComponent(author)}`;
+  };
+
+  const toggleShowAllAuthors = () => {
+    setShowAllAuthors(!showAllAuthors);
+  };
+
+  const displayedAuthors = showAllAuthors ? skillData.authors : skillData.authors.slice(0, 3);
+  const hasMoreAuthors = skillData.authors.length > 3;
+
   return (
     <div className="skill-page">
       <Link to="/" className="skill-page__back">
@@ -51,6 +65,31 @@ export default function SkillPage({ skillData }: SkillPageProps) {
           Open SKILL.md
         </a>
       </div>
+
+      {/* Authors */}
+      {skillData.authors && skillData.authors.length > 0 && (
+        <div className="skill-page__authors" role="complementary" aria-label="Skill authors">
+          <span className="skill-page__authors-label">// Authors: </span>
+          {displayedAuthors.map((author, idx) => (
+            <button
+              key={idx}
+              className="skill-card__author-btn"
+              onClick={() => handleAuthorClick(author)}
+            >
+              {author}
+            </button>
+          ))}
+          {hasMoreAuthors && (
+            <button
+              className={`skill-card__category-toggle ${showAllAuthors ? 'is-expanded' : ''}`}
+              onClick={toggleShowAllAuthors}
+              title={showAllAuthors ? 'Show less' : `Show ${skillData.authors.length - 3} more`}
+            >
+              {showAllAuthors ? '−' : `+${skillData.authors.length - 3}`}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Skill Content */}
       <article className="skill-content">
