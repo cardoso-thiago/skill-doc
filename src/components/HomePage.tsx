@@ -20,6 +20,17 @@ interface HomeProps {
   };
 }
 
+function SkipLink() {
+  return (
+    <a
+      href="#main-content"
+      className="skip-link"
+    >
+      Skip to main content
+    </a>
+  );
+}
+
 /**
  * Highlights matched portion of text with a <mark> element.
  */
@@ -273,6 +284,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
 
   return (
     <div className="skills-layout">
+      <SkipLink />
       <header className="site-header">
         <p className="site-header__eyebrow">Agent Skills Registry</p>
         <h1 className="site-header__title">
@@ -362,7 +374,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
             )}
           </div>
 
-          <main>
+          <main id="main-content" tabIndex={-1}>
             <div className="skills-grid" role="list">
               {filteredSkills.length > 0 ? (
                 filteredSkills.map((skill) => (
