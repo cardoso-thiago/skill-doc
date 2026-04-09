@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
+import { useLocation } from '@docusaurus/router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -39,6 +40,7 @@ function DownloadIcon() {
 
 export default function SkillPage({ skillData }: SkillPageProps) {
   const [showAllAuthors, setShowAllAuthors] = useState(false);
+  const location = useLocation();
 
   const handleAuthorClick = (author: string) => {
     window.location.href = `/?author=${encodeURIComponent(author)}`;
@@ -53,11 +55,11 @@ export default function SkillPage({ skillData }: SkillPageProps) {
 
   return (
     <div className="skill-page">
-      <Link to="/" className="skill-page__back">
+      <Link to={`/${location.search}`} className="skill-page__back">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M10 7H4M4 7L6.5 4.5M4 7L6.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Back to all skills
+        Back to skills
       </Link>
 
       {/* Industrial Command Console */}

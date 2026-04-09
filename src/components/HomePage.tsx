@@ -14,8 +14,17 @@ interface Skill {
   authors: string[];
 }
 
+interface Bundle {
+  id: string;
+  name: string;
+  description: string;
+  skillIds: string[];
+  downloadUrl: string;
+}
+
 interface HomeProps {
   skillsData: Skill[];
+  bundlesData: Bundle[];
   infoData: {
     content: string;
   };
@@ -29,6 +38,15 @@ function SkipLink() {
     >
       Skip to main content
     </a>
+  );
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
   );
 }
 
@@ -69,11 +87,13 @@ function DownloadIcon() {
 function SkillCard({
   skill,
   query,
+  currentSearch,
   onCategoryClick,
   onAuthorClick
 }: {
   skill: Skill;
   query: string;
+  currentSearch: string;
   onCategoryClick: (category: string) => void;
   onAuthorClick: (author: string) => void;
 }) {
@@ -112,7 +132,7 @@ function SkillCard({
 
   return (
     <div className="skill-card-wrapper">
-      <Link to={`/skill/${skill.id}`} className="skill-card">
+      <Link to={`/skill/${skill.id}${currentSearch}`} className="skill-card">
         <div className="skill-card__header">
           <div className="skill-card__categories">
             {displayedCategories.map((cat) => (
@@ -206,23 +226,137 @@ function SkillCard({
   );
 }
 
-export default function Home({ skillsData = [], infoData }: HomeProps) {
-  const [query, setQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'skills' | 'categories' | 'authors' | 'info'>('skills');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+
+function BundleCard({
+  bundle,
+  onSelect
+}: {
+  bundle: Bundle;
+  onSelect: (bundle: Bundle) => void;
+}) {
+  return (
+    <div className="bundle-card" onClick={() => onSelect(bundle)}>
+      <div className="bundle-card__content">
+        <div className="bundle-card__header">
+          <div className="module__led"></div>
+        </div>
+        <h2 className="bundle-card__name">{bundle.name}</h2>
+        <p className="bundle-card__description">{bundle.description}</p>
+        <div className="bundle-card__manifest">
+          <span className="manifest__label">CONTAINS {bundle.skillIds.length} SKILLS:</span>
+          <div className="manifest__list">
+            {bundle.skillIds.slice(0, 5).map(id => (
+              <span key={id} className="manifest__item">{id}</span>
+            ))}
+            {bundle.skillIds.length > 5 && (
+              <span className="manifest__item">+{bundle.skillIds.length - 5} MORE</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Home({ skillsData = [], bundlesData = [], infoData }: HomeProps) {
+  // Helper to read from URL
+  const getParam = (key: string) => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get(key);
+  };
+
+  const [query, setQuery] = useState(() => {
+    const q = getParam('q');
+    return q ? decodeURIComponent(q) : '';
+  });
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => {
+    const cat = getParam('cat');
+    return cat ? decodeURIComponent(cat) : null;
+  });
+
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(() => {
+    const author = getParam('author');
+    return author ? decodeURIComponent(author) : null;
+  });
+
+  const [selectedBundleId, setSelectedBundleId] = useState<string | null>(() => {
+    const bundle = getParam('bundle');
+    return bundle ? decodeURIComponent(bundle) : null;
+  });
+
+  const [activeTab, setActiveTab] = useState<'skills' | 'bundles' | 'categories' | 'authors' | 'info'>(() => {
+    // Priority: If any filter is active, force 'skills' tab
+    const cat = getParam('cat');
+    const author = getParam('author');
+    const bundle = getParam('bundle');
+    const q = getParam('q');
+    if (cat || author || bundle || q) return 'skills';
+
+    const tab = getParam('tab');
+    if (tab && ['skills', 'bundles', 'categories', 'authors', 'info'].includes(tab)) return tab as any;
+    return 'skills';
+  });
+
+  // Reative Query String Generator
+  const currentSearch = useMemo(() => {
+    const params = new URLSearchParams();
+    if (activeTab !== 'skills') params.set('tab', activeTab);
+    if (query) params.set('q', query);
+    if (selectedCategory) params.set('cat', selectedCategory);
+    if (selectedAuthor) params.set('author', selectedAuthor);
+    if (selectedBundleId) params.set('bundle', selectedBundleId);
+    const str = params.toString();
+    return str ? '?' + str : '';
+  }, [activeTab, query, selectedCategory, selectedAuthor, selectedBundleId]);
+
+  const selectedBundle = useMemo(() => 
+    bundlesData.find(b => b.id === selectedBundleId) || null
+  , [bundlesData, selectedBundleId]);
 
   const [catSortBy, setCatSortBy] = useState<'name' | 'count'>('name');
   const [authorSortBy, setAuthorSortBy] = useState<'name' | 'count'>('count');
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const authorParam = params.get('author');
-    if (authorParam) {
-      setSelectedAuthor(decodeURIComponent(authorParam));
-      setActiveTab('skills');
-    }
+  // Sync state with URL - using the reactive currentSearch
+  const updateUrl = useCallback((searchStr: string) => {
+    if (typeof window === 'undefined') return;
+    const newUrl = `${window.location.pathname}${searchStr}`;
+    window.history.replaceState(null, '', newUrl);
   }, []);
+
+  // Sync state FROM url on popstate (back/forward button)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      const qVal = params.get('q') ? decodeURIComponent(params.get('q')!) : '';
+      const catVal = params.get('cat') ? decodeURIComponent(params.get('cat')!) : null;
+      const authorVal = params.get('author') ? decodeURIComponent(params.get('author')!) : null;
+      const bundleVal = params.get('bundle') ? decodeURIComponent(params.get('bundle')!) : null;
+
+      setQuery(qVal);
+      setSelectedCategory(catVal);
+      setSelectedAuthor(authorVal);
+      setSelectedBundleId(bundleVal);
+
+      const tabParam = params.get('tab') as any;
+      if (qVal || catVal || authorVal || bundleVal) {
+        setActiveTab('skills');
+      } else if (tabParam && ['skills', 'bundles', 'categories', 'authors', 'info'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      } else {
+        setActiveTab('skills');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update URL whenever significant state changes
+  useEffect(() => {
+    updateUrl(currentSearch);
+  }, [currentSearch, updateUrl]);
 
   const categoriesWithCounts = useMemo(() => {
     const list = Array.from(new Set(skillsData.flatMap(s => s.categories)));
@@ -265,7 +399,12 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
   const filteredSkills = useMemo(() => {
     let result = skillsData;
 
-    // Filter by selected category first
+    // Filter by bundle membership
+    if (selectedBundle) {
+      result = result.filter(s => selectedBundle.skillIds.includes(s.id));
+    }
+
+    // Filter by selected category
     if (selectedCategory) {
       result = result.filter(s => s.categories.includes(selectedCategory));
     }
@@ -289,7 +428,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
     }
 
     return result;
-  }, [skillsData, query, selectedCategory, selectedAuthor]);
+  }, [skillsData, query, selectedCategory, selectedAuthor, selectedBundle]);
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -297,14 +436,26 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
 
   const clearCategory = () => setSelectedCategory(null);
   const clearAuthor = () => setSelectedAuthor(null);
+  const clearBundle = () => setSelectedBundleId(null);
 
   const handleCategorySelect = (cat: string) => {
     setSelectedCategory(cat);
+    setSelectedAuthor(null);
+    setSelectedBundleId(null);
     setActiveTab('skills');
   };
 
   const handleAuthorSelect = (author: string) => {
     setSelectedAuthor(author);
+    setSelectedCategory(null);
+    setSelectedBundleId(null);
+    setActiveTab('skills');
+  };
+
+  const handleBundleSelect = (bundle: Bundle) => {
+    setSelectedBundleId(bundle.id);
+    setSelectedCategory(null);
+    setSelectedAuthor(null);
     setActiveTab('skills');
   };
 
@@ -329,6 +480,14 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
           >
             Skills
           </button>
+          {bundlesData.length > 0 && (
+            <button
+              className={`nav-tab ${activeTab === 'bundles' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('bundles')}
+            >
+              Bundles
+            </button>
+          )}
           <button
             className={`nav-tab ${activeTab === 'categories' ? 'is-active' : ''}`}
             onClick={() => setActiveTab('categories')}
@@ -382,6 +541,9 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
             <p className="results-meta" aria-live="polite">
               <span className="results-meta__count">{filteredSkills.length}</span>
               {filteredSkills.length === 1 ? ' skill' : ' skills'}
+              {selectedBundle && (
+                <> in bundle <strong>{selectedBundle.name}</strong></>
+              )}
               {selectedCategory && (
                 <> in <strong>{selectedCategory}</strong></>
               )}
@@ -390,14 +552,27 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
               )}
               {query.trim() && ` matching "${query}"`}
             </p>
-            {(selectedCategory || selectedAuthor) && (
-              <button className="clear-filter" onClick={() => {
-                clearCategory();
-                clearAuthor();
-              }}>
-                ✕ Clear filters
-              </button>
-            )}
+            <div className="results-actions">
+              {selectedBundle && (
+               <a 
+                 href={selectedBundle.downloadUrl}
+                 className="bundle-download-action"
+                 title={`Download ${selectedBundle.name} (.zip)`}
+               >
+                 <DownloadIcon />
+                 <span>Download Bundle</span>
+               </a>
+              )}
+              {(selectedCategory || selectedAuthor || selectedBundleId) && (
+                <button className="clear-filter" onClick={() => {
+                  clearCategory();
+                  clearAuthor();
+                  clearBundle();
+                }}>
+                  ✕ Clear filters
+                </button>
+              )}
+            </div>
           </div>
 
           <main id="main-content" tabIndex={-1}>
@@ -408,6 +583,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
                     <SkillCard
                       skill={skill}
                       query={query}
+                      currentSearch={currentSearch}
                       onCategoryClick={handleCategorySelect}
                       onAuthorClick={handleAuthorSelect}
                     />
@@ -425,6 +601,20 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
             </div>
           </main>
         </>
+      )}
+
+      {activeTab === 'bundles' && (
+        <main className="bundles-view">
+          <div className="bundles-grid">
+            {bundlesData.map(bundle => (
+              <BundleCard
+                key={bundle.id}
+                bundle={bundle}
+                onSelect={handleBundleSelect}
+              />
+            ))}
+          </div>
+        </main>
       )}
 
       {activeTab === 'categories' && (

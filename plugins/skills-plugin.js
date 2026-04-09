@@ -26,9 +26,11 @@ function parseFrontmatter(text) {
 }
 
 /**
- * Creates a ZIP file from a directory.
+ * Creates a ZIP file containing multiple directories as subfolders.
+ * @param {Array<{name: string, path: string}>} sources 
+ * @param {string} outPath 
  */
-async function createZip(sourceDir, outPath) {
+async function createBundleZip(sources, outPath) {
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(outPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
@@ -37,7 +39,9 @@ async function createZip(sourceDir, outPath) {
     archive.on('error', reject);
 
     archive.pipe(output);
-    archive.directory(sourceDir, false);
+    sources.forEach(source => {
+      archive.directory(source.path, source.name);
+    });
     archive.finalize();
   });
 }
@@ -54,13 +58,17 @@ module.exports = function skillsPlugin(context, options) {
     async loadContent() {
       const skillsDir = path.join(context.siteDir, 'skills');
       const docPath = path.join(context.siteDir, 'DOC.md');
+      const bundlesPath = path.join(context.siteDir, 'bundles.json');
       const staticDir = path.join(context.siteDir, 'static');
       const downloadsDir = path.join(staticDir, 'downloads', 'skills');
+      const bundleDownloadsDir = path.join(staticDir, 'downloads', 'bundles');
 
-      // Ensure downloads directory exists
-      if (!fs.existsSync(downloadsDir)) {
-        fs.mkdirSync(downloadsDir, { recursive: true });
-      }
+      // Ensure downloads directories exist
+      [downloadsDir, bundleDownloadsDir].forEach(dir => {
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+      });
 
       let infoDoc = '';
       if (fs.existsSync(docPath)) {
@@ -68,7 +76,7 @@ module.exports = function skillsPlugin(context, options) {
       }
 
       if (!fs.existsSync(skillsDir)) {
-        return { skills: [], infoDoc };
+        return { skills: [], bundles: [], infoDoc };
       }
 
       const skillFolders = fs.readdirSync(skillsDir).filter((name) => {
@@ -111,7 +119,19 @@ module.exports = function skillsPlugin(context, options) {
           const zipPath = path.join(downloadsDir, zipFileName);
           
           try {
-            await createZip(currentSkillDir, zipPath);
+            // Keep createZip for single skill
+            const createZipInternal = (sourceDir, outPath) => {
+              return new Promise((resolve, reject) => {
+                const output = fs.createWriteStream(outPath);
+                const archive = archiver('zip', { zlib: { level: 9 } });
+                output.on('close', resolve);
+                archive.on('error', reject);
+                archive.pipe(output);
+                archive.directory(sourceDir, false);
+                archive.finalize();
+              });
+            };
+            await createZipInternal(currentSkillDir, zipPath);
           } catch (err) {
             console.error(`Failed to create ZIP for skill ${folderName}:`, err);
           }
@@ -128,40 +148,89 @@ module.exports = function skillsPlugin(context, options) {
             authors,
             githubUrl,
             downloadUrl,
+            path: currentSkillDir, // Keep internal path for bundle zipping
           };
         })
       );
 
+      const validSkills = skills.filter(Boolean);
+
+      // --- Bundle Logic ---
+      let bundles = [];
+      if (fs.existsSync(bundlesPath)) {
+        try {
+          const rawBundles = JSON.parse(fs.readFileSync(bundlesPath, 'utf-8'));
+          bundles = await Promise.all(rawBundles.map(async (bundle) => {
+            // Requirement check: name is mandatory
+            if (!bundle.name || !bundle.name.trim()) return null;
+
+            // Mapping: Inclusive logic (OR across all filters)
+            const matchedSkills = validSkills.filter(skill => {
+              const matchedCategory = bundle.categories && skill.categories.some(c => bundle.categories.includes(c));
+              const matchedFolder = bundle.folders && bundle.folders.includes(skill.id);
+              const matchedAuthor = bundle.authors && skill.authors.some(a => bundle.authors.includes(a));
+              
+              return matchedCategory || matchedFolder || matchedAuthor;
+            });
+
+            // Requirement check: hide empty bundles
+            if (matchedSkills.length === 0) return null;
+
+            const bundleId = bundle.id || bundle.name.toLowerCase().replace(/\s+/g, '-');
+            const zipFileName = `${bundleId}.zip`;
+            const zipPath = path.join(bundleDownloadsDir, zipFileName);
+
+            // Generate ZIP for the bundle
+            try {
+              const sources = matchedSkills.map(s => ({ name: s.id, path: s.path }));
+              await createBundleZip(sources, zipPath);
+            } catch (err) {
+              console.error(`Failed to create ZIP for bundle ${bundle.name}:`, err);
+            }
+
+            const downloadUrl = `${context.baseUrl}downloads/bundles/${zipFileName}`;
+
+            return {
+              id: bundleId,
+              name: bundle.name,
+              description: bundle.description || '',
+              skillIds: matchedSkills.map(s => s.id),
+              downloadUrl,
+            };
+          }));
+        } catch (err) {
+          console.error('Failed to parse bundles.json:', err);
+        }
+      }
+
+      // Cleanup internal paths before returning to Docusaurus
+      const cleanedSkills = validSkills.map(({ path: _, ...rest }) => rest);
+
       return { 
-        skills: skills.filter(Boolean), 
+        skills: cleanedSkills, 
+        bundles: bundles.filter(Boolean),
         infoDoc 
       };
     },
 
     async contentLoaded({ content, actions }) {
-      const { createData, addRoute, setGlobalData } = actions;
-      const { skills, infoDoc } = content;
+      const { createData, addRoute } = actions;
+      const { skills, bundles, infoDoc } = content;
 
-      // Write the full skills data as a JSON module
-      const skillsDataPath = await createData(
-        'skills-index.json',
-        JSON.stringify(skills)
-      );
-
-      // Write the info documentation data
-      const infoDataPath = await createData(
-        'info-doc.json',
-        JSON.stringify({ content: infoDoc })
-      );
+      // Write data modules
+      const skillsDataPath = await createData('skills-index.json', JSON.stringify(skills));
+      const bundlesDataPath = await createData('bundles-index.json', JSON.stringify(bundles));
+      const infoDataPath = await createData('info-doc.json', JSON.stringify({ content: infoDoc }));
 
       const { baseUrl } = context;
 
-      // Home route: custom route using the component in src/components
+      // Home route
       addRoute({
         path: baseUrl,
         component: '@site/src/components/HomePage',
         modules: {
           skillsData: skillsDataPath,
+          bundlesData: bundlesDataPath,
           infoData: infoDataPath,
         },
         exact: true,

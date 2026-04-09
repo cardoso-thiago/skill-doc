@@ -1,0 +1,29 @@
+[
+  {
+    "id": "essentials-bundle",
+    "name": "Creative Essentials",
+    "description": "A collection of essential skills for modern frontend development and creative work.",
+    "categories": [
+      "Design",
+      "Frontend",
+      "Test8"
+    ],
+    "authors": [
+      "Test8"
+    ],
+    "folders": [
+      "accessibility-compliance"
+    ]
+  },
+  {
+    "id": "technical-deep-dive",
+    "name": "Technical Deep Dive",
+    "description": "Advanced technical patterns and integration skills.",
+    "folders": [
+      "random-test-skill"
+    ],
+    "categories": [
+      "infrastructure"
+    ]
+  }
+]
