@@ -29,3 +29,4 @@ yarn-error.log*
 
 .agents/
 .kilo/
+/static/downloads

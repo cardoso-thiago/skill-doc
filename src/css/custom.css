@@ -1062,3 +1062,353 @@ a:focus-visible {
   color: var(--text-muted);
   letter-spacing: 0.05em;
 }
+/* ── Download Badges & Buttons ── */
+.skill-page__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-xl);
+}
+
+.skill-page__badges .github-badge,
+.skill-page__badges .download-badge {
+  flex: 1;
+  min-width: 300px;
+  margin-bottom: 0;
+}
+
+.download-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--gap-md) var(--gap-lg);
+}
+
+.download-badge__label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.download-badge__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none !important;
+  padding: 6px 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s var(--ease-out);
+}
+
+.download-badge__link:hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 12px var(--accent-glow);
+  color: var(--accent);
+}
+
+/* Home Card Actions */
+.skill-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex-shrink: 0;
+}
+
+.skill-card__download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  transition: all 0.2s var(--ease-out);
+  z-index: 10;
+  position: relative;
+}
+
+.skill-card__download-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .skill-page__badges .github-badge,
+  .skill-page__badges .download-badge {
+    min-width: 100%;
+  }
+}
+
+/* ── Redesigned Action Boxes (Home & Skill Page) ── */
+.skill-card__actions-grid,
+.skill-page__actions-grid {
+  display: flex;
+  gap: var(--gap-md);
+  margin: var(--gap-lg) 0;
+}
+
+.skill-card__action-box,
+.skill-page__action-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--gap-md) var(--gap-lg);
+  transition: all 0.2s var(--ease-out);
+}
+
+.skill-card__action-box:hover,
+.skill-page__action-box:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.skill-card__action-label,
+.skill-page__action-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.skill-card__action-btn,
+.skill-page__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none !important;
+  padding: 8px 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s var(--ease-out);
+  background: transparent;
+  width: fit-content;
+}
+
+.skill-card__action-btn:hover,
+.skill-page__action-btn:hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 12px var(--accent-glow);
+  color: var(--accent);
+}
+
+/* Adjustments for Responsive Actions */
+@media (max-width: 650px) {
+  .skill-card__actions-grid,
+  .skill-page__actions-grid {
+    flex-direction: column;
+  }
+}
+
+/* Footer layout inside card */
+.skill-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: var(--gap-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.skill-card__meta-left {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+}
+
+/* ── Unified Skill Actions (Skill Page) ── */
+.skill-page__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-xl);
+}
+
+.skill-page__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none !important;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s var(--ease-out);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skill-page__action-btn svg {
+  transition: transform 0.2s var(--ease-out);
+}
+
+.skill-page__action-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.skill-page__action-btn:hover svg {
+  transform: translateY(-2px);
+}
+
+.skill-page__action-btn--github {
+  border-left: 4px solid var(--border-strong);
+}
+
+.skill-page__action-btn--download {
+  border-left: 4px solid var(--accent);
+}
+
+@media (max-width: 600px) {
+  .skill-page__actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Industrial Command Console (Skill Page) ── */
+.skill-console {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px; /* Hairline border effect */
+  background: var(--border-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin: var(--gap-xl) 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.skill-console__module {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  padding: var(--gap-lg);
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 120px;
+  justify-content: space-between;
+}
+
+/* Subtle Noise Texture for depth */
+.skill-console__module::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+.module__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--gap-md);
+}
+
+.module__tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  font-weight: 600;
+}
+
+.module__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #222;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.module__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-md);
+  margin-top: auto;
+}
+
+.module__label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.15em;
+  transition: color 0.3s ease;
+}
+
+/* Interactive States */
+.skill-console:hover .skill-console__module:not(:hover) {
+  opacity: 0.4;
+  filter: grayscale(0.5) blur(1px);
+}
+
+.skill-console__module:hover {
+  background: var(--bg-elevated);
+  z-index: 1;
+}
+
+.skill-console__module:hover .module__led {
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow), 0 0 2px var(--accent);
+}
+
+.skill-console__module:hover .module__label {
+  color: var(--accent);
+}
+
+.skill-console__module:hover svg {
+  color: var(--accent);
+  transform: translateY(-2px) scale(1.1);
+}
+
+.skill-console__module svg {
+  color: var(--text-muted);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .skill-console {
+    grid-template-columns: 1fr;
+  }
+  
+  .skill-console__module {
+    min-height: 100px;
+  }
+}

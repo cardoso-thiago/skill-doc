@@ -9,6 +9,7 @@ interface Skill {
   description: string;
   license: string | null;
   githubUrl: string;
+  downloadUrl: string;
   categories: string[];
   authors: string[];
 }
@@ -52,6 +53,16 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
         )
       )}
     </>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
   );
 }
 
@@ -123,22 +134,37 @@ function SkillCard({
               </button>
             )}
           </div>
-          <svg
-            className="skill-card__arrow"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M3 13L13 3M13 3H6M13 3V10"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <div className="skill-card__actions">
+            <a
+              href={skill.downloadUrl}
+              download={`${skill.id}.zip`}
+              className="skill-card__download-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = skill.downloadUrl;
+              }}
+              title="Download skill (.zip)"
+            >
+              <DownloadIcon />
+            </a>
+            <svg
+              className="skill-card__arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 13L13 3M13 3H6M13 3V10"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </div>
 
         <h2 className="skill-card__name">
@@ -197,7 +223,7 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
       setActiveTab('skills');
     }
   }, []);
-  
+
   const categoriesWithCounts = useMemo(() => {
     const list = Array.from(new Set(skillsData.flatMap(s => s.categories)));
     return list.map(name => ({
@@ -404,13 +430,13 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
       {activeTab === 'categories' && (
         <main className="categories-view">
           <div className="category-header">
-            <button 
+            <button
               className={`category-header__label ${catSortBy === 'name' ? 'is-active' : ''}`}
               onClick={() => setCatSortBy('name')}
             >
               CATEGORY
             </button>
-            <button 
+            <button
               className={`category-header__label ${catSortBy === 'count' ? 'is-active' : ''}`}
               onClick={() => setCatSortBy('count')}
             >
@@ -438,13 +464,13 @@ export default function Home({ skillsData = [], infoData }: HomeProps) {
       {activeTab === 'authors' && (
         <main className="categories-view">
           <div className="category-header">
-            <button 
+            <button
               className={`category-header__label ${authorSortBy === 'name' ? 'is-active' : ''}`}
               onClick={() => setAuthorSortBy('name')}
             >
               AUTHOR
             </button>
-            <button 
+            <button
               className={`category-header__label ${authorSortBy === 'count' ? 'is-active' : ''}`}
               onClick={() => setAuthorSortBy('count')}
             >

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const archiver = require('archiver');
 
 /**
  * Parses YAML frontmatter from a markdown string.
@@ -24,6 +25,23 @@ function parseFrontmatter(text) {
   return { data, content };
 }
 
+/**
+ * Creates a ZIP file from a directory.
+ */
+async function createZip(sourceDir, outPath) {
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(outPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', resolve);
+    archive.on('error', reject);
+
+    archive.pipe(output);
+    archive.directory(sourceDir, false);
+    archive.finalize();
+  });
+}
+
 // Docusaurus plugin: reads all skills folders, extracts frontmatter,
 // and creates routes for the home index and individual skill pages.
 module.exports = function skillsPlugin(context, options) {
@@ -36,6 +54,13 @@ module.exports = function skillsPlugin(context, options) {
     async loadContent() {
       const skillsDir = path.join(context.siteDir, 'skills');
       const docPath = path.join(context.siteDir, 'DOC.md');
+      const staticDir = path.join(context.siteDir, 'static');
+      const downloadsDir = path.join(staticDir, 'downloads', 'skills');
+
+      // Ensure downloads directory exists
+      if (!fs.existsSync(downloadsDir)) {
+        fs.mkdirSync(downloadsDir, { recursive: true });
+      }
 
       let infoDoc = '';
       if (fs.existsSync(docPath)) {
@@ -51,11 +76,12 @@ module.exports = function skillsPlugin(context, options) {
         return fs.statSync(dirPath).isDirectory();
       });
 
-      const skills = skillFolders
-        .map((folderName) => {
+      const skills = await Promise.all(
+        skillFolders.map(async (folderName) => {
           const skillMdPath = path.join(skillsDir, folderName, 'SKILL.md');
           const categoryPath = path.join(skillsDir, folderName, 'category.txt');
           const authorPath = path.join(skillsDir, folderName, 'author.txt');
+          const currentSkillDir = path.join(skillsDir, folderName);
           
           if (!fs.existsSync(skillMdPath)) return null;
 
@@ -79,6 +105,18 @@ module.exports = function skillsPlugin(context, options) {
           }
 
           const githubUrl = `${GITHUB_REPO}/blob/${GITHUB_BRANCH}/skills/${folderName}/SKILL.md`;
+          
+          // Generate ZIP for the skill
+          const zipFileName = `${folderName}.zip`;
+          const zipPath = path.join(downloadsDir, zipFileName);
+          
+          try {
+            await createZip(currentSkillDir, zipPath);
+          } catch (err) {
+            console.error(`Failed to create ZIP for skill ${folderName}:`, err);
+          }
+
+          const downloadUrl = `${context.baseUrl}downloads/skills/${zipFileName}`;
 
           return {
             id: folderName,
@@ -89,11 +127,15 @@ module.exports = function skillsPlugin(context, options) {
             categories,
             authors,
             githubUrl,
+            downloadUrl,
           };
         })
-        .filter(Boolean);
+      );
 
-      return { skills, infoDoc };
+      return { 
+        skills: skills.filter(Boolean), 
+        infoDoc 
+      };
     },
 
     async contentLoaded({ content, actions }) {
@@ -144,3 +186,4 @@ module.exports = function skillsPlugin(context, options) {
     },
   };
 };
+
